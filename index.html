@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,692 +9,496 @@
   <meta name="apple-mobile-web-app-title" content="Disaster Tycoon" />
   <title>Disaster Tycoon — City 1: The Flood</title>
   <style>
-    :root {
-      --bg-dark: #0f172a;
-      --card-bg: #1e293b;
-      --card-locked: #162032;
-      --accent: #38bdf8;
-      --green: #22c55e;
-      --gold: #facc15;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-    }
-
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      touch-action: none;
     }
 
-    body {
+    body, html {
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      min-height: 100vh;
-    }
-
-    #app {
       width: 100%;
-      max-width: 480px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background: var(--bg-dark);
-      position: relative;
-      padding-bottom: 80px;
+      height: 100%;
+      overflow: hidden;
+      background: #0f172a;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #f8fafc;
     }
 
-    /* Character Creation Modal */
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Setup Modal */
     #setup-screen {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.98);
+      background: rgba(15, 23, 42, 0.96);
       z-index: 100;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px;
-      text-align: center;
+      padding: 20px;
     }
 
     .setup-box {
-      background: var(--card-bg);
-      padding: 28px 22px;
+      background: #1e293b;
+      padding: 26px 20px;
       border-radius: 20px;
       width: 100%;
-      max-width: 380px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      max-width: 360px;
       border: 1px solid #334155;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
     }
 
     .setup-box h1 {
       margin: 0 0 8px;
       font-size: 24px;
-      color: var(--accent);
+      color: #38bdf8;
     }
 
     .setup-box p {
-      margin: 0 0 20px;
-      color: var(--text-muted);
-      font-size: 14px;
+      margin: 0 0 18px;
+      font-size: 13px;
+      color: #94a3b8;
       line-height: 1.4;
     }
 
     .input-group {
       text-align: left;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .input-group label {
       display: block;
-      font-size: 12px;
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
+      letter-spacing: 0.6px;
+      color: #94a3b8;
       margin-bottom: 6px;
       font-weight: 700;
     }
 
     .input-group input {
       width: 100%;
-      padding: 12px 14px;
+      padding: 12px;
       border-radius: 12px;
       border: 1px solid #475569;
       background: #0f172a;
       color: white;
       font-size: 16px;
       outline: none;
+      touch-action: auto;
+      user-select: text;
     }
 
     .gender-options {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
     }
 
     .gender-btn {
-      padding: 12px 8px;
+      padding: 12px;
       border-radius: 12px;
       border: 2px solid #334155;
       background: #0f172a;
       color: white;
-      font-weight: 600;
-      font-size: 14px;
+      font-weight: 700;
+      font-size: 15px;
       cursor: pointer;
     }
 
-    .gender-btn.selected {
-      border-color: var(--accent);
-      background: rgba(56, 189, 248, 0.15);
+    .gender-btn.male.selected {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.25);
+      color: #93c5fd;
+    }
+
+    .gender-btn.female.selected {
+      border-color: #ec4899;
+      background: rgba(236, 72, 153, 0.25);
+      color: #f9a8d4;
     }
 
     .start-btn {
       width: 100%;
-      margin-top: 20px;
+      margin-top: 18px;
       padding: 14px;
       border: none;
       border-radius: 14px;
-      background: var(--green);
+      background: #22c55e;
       color: #052e16;
       font-size: 17px;
       font-weight: 800;
       cursor: pointer;
     }
 
-    /* Top Header */
-    header {
-      padding: 14px 16px;
-      background: #1e293b;
+    /* Top HUD */
+    #hud-top {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      right: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #334155;
-      position: sticky;
-      top: 0;
+      pointer-events: none;
       z-index: 20;
     }
 
-    .player-badge {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .avatar-circle {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: #334155;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      position: relative;
-      border: 2px solid var(--accent);
-    }
-
-    .avatar-hat {
-      position: absolute;
-      top: -11px;
-      font-size: 16px;
-    }
-
-    .player-info h2 {
-      margin: 0;
-      font-size: 15px;
-      font-weight: 700;
-    }
-
-    .player-info span {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .money-pill {
-      background: #0f172a;
+    .hud-pill {
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid #334155;
       padding: 8px 14px;
       border-radius: 999px;
-      border: 1px solid #334155;
       font-weight: 800;
-      font-size: 18px;
-      color: var(--gold);
-    }
-
-    /* Visual Town Banner */
-    #town-scene {
-      height: 170px;
-      position: relative;
-      overflow: hidden;
-      transition: background 0.6s ease;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 12px 16px;
-      border-bottom: 2px solid #334155;
-    }
-
-    .sky-storm { background: linear-gradient(180deg, #1e293b 0%, #475569 100%); }
-    .sky-sunny { background: linear-gradient(180deg, #0284c7 0%, #7dd3fc 100%); }
-    .sky-sunset { background: linear-gradient(180deg, #7c2d12 0%, #fb923c 100%); }
-    .sky-night { background: linear-gradient(180deg, #090d16 0%, #312e81 100%); }
-
-    .town-header-tag {
-      position: absolute;
-      top: 10px;
-      left: 12px;
-      background: rgba(15, 23, 42, 0.75);
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .city-progress-wrap {
-      position: absolute;
-      top: 10px;
-      right: 12px;
-      background: rgba(15, 23, 42, 0.75);
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--green);
-    }
-
-    .buildings-row {
-      display: flex;
-      justify-content: space-around;
-      align-items: flex-end;
-      z-index: 2;
-      margin-bottom: 14px;
-      font-size: 34px;
-    }
-
-    .building-slot {
-      transition: transform 0.4s ease, opacity 0.4s ease;
-      text-align: center;
-    }
-
-    .building-slot.ruined {
-      filter: grayscale(100%) brightness(0.65);
-      transform: scale(0.9);
-    }
-
-    .ground-layer {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 28px;
-      background: #713f12;
-      transition: background 0.6s ease;
-      z-index: 1;
-    }
-
-    .water-overlay {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 36px;
-      background: rgba(14, 165, 233, 0.55);
-      transition: height 0.6s ease, opacity 0.6s ease;
-      z-index: 3;
-      pointer-events: none;
-    }
-
-    /* Next City Banner */
-    #city-complete-banner {
-      display: none;
-      background: linear-gradient(90deg, #16a34a, #15803d);
-      padding: 12px 16px;
-      text-align: center;
-      font-weight: 700;
       font-size: 14px;
+      backdrop-filter: blur(6px);
+      pointer-events: auto;
     }
 
-    /* Content Area */
-    .tab-content {
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    .money-text {
+      color: #facc15;
+      font-size: 17px;
     }
 
-    .station-card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 14px;
-      border: 1px solid #334155;
+    .shop-btn {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: white;
+      cursor: pointer;
     }
 
-    .station-card.locked {
-      background: var(--card-locked);
-      border: 1px dashed #475569;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    /* Contextual Bottom Action Card */
+    #action-panel {
+      position: fixed;
+      bottom: 24px;
+      right: 14px;
+      width: 225px;
+      background: rgba(15, 23, 42, 0.94);
+      border: 1px solid #475569;
+      border-radius: 18px;
+      padding: 12px;
+      z-index: 25;
+      display: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
     }
 
-    .station-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .station-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .station-icon {
-      font-size: 28px;
-      background: #0f172a;
-      width: 46px;
-      height: 46px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .station-title h3 {
-      margin: 0;
-      font-size: 16px;
-    }
-
-    .station-meta {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    .payout-badge {
-      font-weight: 800;
-      color: var(--green);
+    #action-panel h3 {
+      margin: 0 0 4px;
       font-size: 15px;
-      text-align: right;
+      color: #f8fafc;
     }
 
-    .progress-track {
+    #action-panel p {
+      margin: 0 0 10px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .act-btn {
       width: 100%;
-      height: 12px;
-      background: #0f172a;
-      border-radius: 999px;
-      overflow: hidden;
-      margin-bottom: 12px;
-      border: 1px solid #334155;
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #38bdf8, #22c55e);
-      transition: width 0.08s linear;
-    }
-
-    .upgrade-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .btn {
+      padding: 11px 10px;
       border: none;
       border-radius: 12px;
-      padding: 10px 12px;
-      font-weight: 700;
-      font-size: 13px;
+      font-weight: 800;
+      font-size: 14px;
+      margin-bottom: 6px;
       cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.08s ease, opacity 0.2s ease;
     }
 
-    .btn:active {
+    .act-btn:last-child {
+      margin-bottom: 0;
+    }
+
+    .btn-work {
+      background: #22c55e;
+      color: #052e16;
+      font-size: 16px;
+      padding: 14px 10px;
+    }
+
+    .btn-work:active {
+      background: #16a34a;
       transform: scale(0.97);
     }
 
-    .btn:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-
     .btn-rebuild {
-      background: var(--gold);
+      background: #facc15;
       color: #422006;
-      padding: 12px 16px;
-      font-size: 14px;
     }
 
     .btn-upgrade {
+      background: #3b82f6;
+      color: white;
+      font-size: 12px;
+      padding: 8px;
+    }
+
+    .act-btn:disabled {
+      opacity: 0.4;
+    }
+
+    /* Cosmetic Shop Modal */
+    #shop-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.95);
+      z-index: 80;
+      display: none;
+      flex-direction: column;
+      padding: 18px;
+      overflow-y: auto;
+      touch-action: pan-y;
+    }
+
+    .shop-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .close-shop {
       background: #334155;
       color: white;
-    }
-
-    .btn-upgrade.affordable {
-      background: #0284c7;
-      color: white;
-    }
-
-    .btn-worker {
-      background: #334155;
-      color: white;
-    }
-
-    .btn-worker.affordable {
-      background: #16a34a;
-      color: white;
-    }
-
-    .btn small {
-      font-size: 11px;
-      opacity: 0.9;
-      margin-top: 2px;
-    }
-
-    /* Cosmetic Shop */
-    .shop-section-title {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: var(--text-muted);
-      margin: 6px 0 4px;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 10px;
       font-weight: 700;
     }
 
     .shop-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: 1fr 1fr;
       gap: 10px;
+      margin-bottom: 18px;
     }
 
-    .shop-item {
-      background: var(--card-bg);
+    .shop-card {
+      background: #1e293b;
       border: 1px solid #334155;
       border-radius: 14px;
       padding: 12px;
       text-align: center;
     }
 
-    .shop-item.equipped {
-      border-color: var(--green);
-      background: rgba(34, 197, 94, 0.1);
+    .shop-card.equipped {
+      border-color: #22c55e;
     }
 
-    .shop-preview {
-      font-size: 30px;
-      margin-bottom: 6px;
-    }
-
-    .shop-name {
-      font-weight: 700;
-      font-size: 14px;
-      margin-bottom: 8px;
-    }
-
-    /* Bottom Navigation */
-    nav {
+    .hint-banner {
       position: fixed;
-      bottom: 0;
-      width: 100%;
-      max-width: 480px;
-      background: #1e293b;
-      border-top: 1px solid #334155;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      padding: 8px 12px 18px;
-      z-index: 30;
-    }
-
-    .nav-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-weight: 700;
-      font-size: 14px;
-      padding: 8px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
-    .nav-btn.active {
-      color: var(--accent);
-      background: rgba(56, 189, 248, 0.12);
+      top: 56px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.8);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: #cbd5e1;
+      pointer-events: none;
+      z-index: 15;
+      white-space: nowrap;
     }
   </style>
 </head>
 <body>
-<div id="app">
-  <!-- Character Setup -->
+
+  <!-- Character Creation -->
   <div id="setup-screen">
     <div class="setup-box">
-      <h1>🌊 Disaster Tycoon</h1>
-      <p>City 1: A devastating flood has left this village deserted. Earn money, rebuild workplaces, and bring the town back to life.</p>
+      <h1>🌊 City 1: The Flood</h1>
+      <p>Walk around the flooded town, work manually at stations to earn cash, and rebuild every building.</p>
       <div class="input-group">
-        <label>Your Name</label>
-        <input type="text" id="char-name-input" placeholder="Enter your name..." maxlength="16" />
+        <label>Character Name</label>
+        <input type="text" id="char-name-input" placeholder="Enter your name..." maxlength="14" />
       </div>
       <div class="input-group">
         <label>Select Gender</label>
         <div class="gender-options">
-          <button type="button" class="gender-btn selected" data-gender="Male" onclick="selectGender(this)">Male</button>
-          <button type="button" class="gender-btn" data-gender="Female" onclick="selectGender(this)">Female</button>
-          <button type="button" class="gender-btn" data-gender="Other" onclick="selectGender(this)">Other</button>
+          <button type="button" class="gender-btn male selected" data-gender="Male" onclick="selectGender(this)">Male (Blue)</button>
+          <button type="button" class="gender-btn female" data-gender="Female" onclick="selectGender(this)">Female (Pink)</button>
         </div>
       </div>
-      <button class="start-btn" onclick="startGame()">Spawn in Town</button>
+      <button class="start-btn" onclick="startGame()">Enter City</button>
     </div>
   </div>
 
-  <!-- Header -->
-  <header>
-    <div class="player-badge">
-      <div class="avatar-circle" id="header-avatar">
-        <span class="avatar-hat" id="header-hat"></span>
-        <span id="header-skin">🧑</span>
-      </div>
-      <div class="player-info">
-        <h2 id="header-name">Builder</h2>
-        <span id="header-sub">City 1 • Flood Recovery</span>
-      </div>
+  <!-- Top HUD -->
+  <div id="hud-top">
+    <div class="hud-pill money-text" id="hud-money">£0</div>
+    <div class="hud-pill" id="hud-progress">City: 1/5</div>
+    <button class="hud-pill shop-btn" onclick="toggleShop(true)">🎩 Shop</button>
+  </div>
+
+  <div class="hint-banner" id="hint-banner">Tap anywhere on the city to walk • Walk to a station to work!</div>
+
+  <!-- Game World Canvas -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Contextual Action Panel when standing near a building -->
+  <div id="action-panel">
+    <h3 id="panel-title">Station</h3>
+    <p id="panel-desc">Details</p>
+    <div id="panel-buttons"></div>
+  </div>
+
+  <!-- Cosmetic Shop -->
+  <div id="shop-modal">
+    <div class="shop-header">
+      <h2 style="margin:0;">🎩 Cosmetic Shop</h2>
+      <button class="close-shop" onclick="toggleShop(false)">Back to City</button>
     </div>
-    <div class="money-pill" id="money-display">£0</div>
-  </header>
-
-  <!-- Visual City Map -->
-  <div id="town-scene" class="sky-storm">
-    <div class="town-header-tag">🏘️ Muddy Creek (Flooded)</div>
-    <div class="city-progress-wrap" id="city-progress-text">Rebuilt: 1/5</div>
-    <div class="buildings-row" id="buildings-visual"></div>
-    <div class="ground-layer" id="ground-layer"></div>
-    <div class="water-overlay" id="water-overlay"></div>
+    <div id="shop-content"></div>
   </div>
-
-  <div id="city-complete-banner">
-    🎉 City 1 Completely Rebuilt! Save up cash for Cosmetics or get ready for City 2: Economic Slump!
-  </div>
-
-  <!-- Tab 1: Workplaces -->
-  <div id="tab-city" class="tab-content"></div>
-
-  <!-- Tab 2: Cosmetic Shop -->
-  <div id="tab-shop" class="tab-content" style="display:none;"></div>
-
-  <!-- Bottom Nav -->
-  <nav>
-    <button class="nav-btn active" id="nav-city" onclick="switchTab('city')">🏗️ Workplaces</button>
-    <button class="nav-btn" id="nav-shop" onclick="switchTab('shop')">🎩 Cosmetic Shop</button>
-  </nav>
-</div>
 
 <script>
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+
+  // World dimensions
+  const WORLD_W = 1200;
+  const WORLD_H = 1200;
+
   const DEFAULT_STATE = {
     created: false,
-    name: "",
+    name: "Player",
     gender: "Male",
     money: 0,
-    equippedSkin: "default",
     equippedHat: "none",
-    equippedBg: "storm",
-    ownedCosmetics: ["default", "none", "storm"],
+    equippedOutfit: "standard",
+    ownedCosmetics: ["none", "standard"],
+    player: { x: 600, y: 620 },
     stations: [
       {
         id: 0,
-        name: "Bucket & Water Pump",
-        icon: "🪣",
-        buildingIcon: "🏚️",
-        rebuiltIcon: "🚰",
+        name: "Water Pump",
+        icon: "🚰",
+        x: 600,
+        y: 470,
+        w: 130,
+        h: 100,
         unlocked: true,
         unlockCost: 0,
         level: 1,
-        workers: 1,
         basePayout: 2,
-        baseTime: 2.0,
-        progress: 0
+        workDuration: 1.4,
+        workProgress: 0
       },
       {
         id: 1,
-        name: "Fallen Timber Yard",
-        icon: "🪓",
-        buildingIcon: "🪵",
-        rebuiltIcon: "🪚",
+        name: "Timber Yard",
+        icon: "🪚",
+        x: 320,
+        y: 420,
+        w: 140,
+        h: 110,
         unlocked: false,
         unlockCost: 50,
         level: 1,
-        workers: 1,
         basePayout: 10,
-        baseTime: 3.0,
-        progress: 0
+        workDuration: 1.8,
+        workProgress: 0
       },
       {
         id: 2,
-        name: "Rescue Soup Kitchen",
+        name: "Soup Kitchen",
         icon: "🍲",
-        buildingIcon: "⛺",
-        rebuiltIcon: "🏠",
+        x: 880,
+        y: 420,
+        w: 140,
+        h: 110,
         unlocked: false,
         unlockCost: 250,
         level: 1,
-        workers: 1,
         basePayout: 45,
-        baseTime: 4.0,
-        progress: 0
+        workDuration: 2.2,
+        workProgress: 0
       },
       {
         id: 3,
-        name: "Hydro Repair Workshop",
+        name: "Hydro Workshop",
         icon: "🔧",
-        buildingIcon: "🏚️",
-        rebuiltIcon: "🏭",
+        x: 320,
+        y: 820,
+        w: 150,
+        h: 115,
         unlocked: false,
         unlockCost: 1000,
         level: 1,
-        workers: 1,
         basePayout: 200,
-        baseTime: 5.0,
-        progress: 0
+        workDuration: 2.6,
+        workProgress: 0
       },
       {
         id: 4,
         name: "Village Town Hall",
         icon: "🏛️",
-        buildingIcon: "🧱",
-        rebuiltIcon: "🏛️",
+        x: 880,
+        y: 820,
+        w: 160,
+        h: 125,
         unlocked: false,
         unlockCost: 5000,
         level: 1,
-        workers: 1,
         basePayout: 950,
-        baseTime: 6.0,
-        progress: 0
+        workDuration: 3.0,
+        workProgress: 0
       }
     ]
   };
 
   const COSMETICS = {
-    skins: [
-      { id: "default", name: "Default Survivor", icon: "🧑", price: 0 },
-      { id: "builder", name: "Site Foreman", icon: "👷", price: 150 },
-      { id: "hero", name: "Rescue Hero", icon: "🦸", price: 1200 },
-      { id: "astronaut", name: "Astro Mayor", icon: "🧑‍🚀", price: 6000 }
-    ],
     hats: [
-      { id: "none", name: "No Hat", icon: "✖️", display: "", price: 0 },
-      { id: "cap", name: "Blue Cap", icon: "🧢", display: "🧢", price: 100 },
-      { id: "tophat", name: "Mayor Top Hat", icon: "🎩", display: "🎩", price: 800 },
-      { id: "crown", name: "Golden Crown", icon: "👑", display: "👑", price: 4500 }
+      { id: "none", name: "No Hat", icon: "", price: 0 },
+      { id: "cap", name: "Builder Cap", icon: "🧢", price: 100 },
+      { id: "hardhat", name: "Safety Helmet", icon: "⛑️", price: 400 },
+      { id: "tophat", name: "Mayor Top Hat", icon: "🎩", price: 1500 },
+      { id: "crown", name: "Golden Crown", icon: "👑", price: 5000 }
     ],
-    bgs: [
-      { id: "storm", name: "Rainy Flood Sky", icon: "🌧️", className: "sky-storm", price: 0 },
-      { id: "sunny", name: "Clear Blue Sky", icon: "☀️", className: "sky-sunny", price: 300 },
-      { id: "sunset", name: "Golden Sunset", icon: "🌅", className: "sky-sunset", price: 1500 },
-      { id: "night", name: "Starry Night", icon: "🌌", className: "sky-night", price: 4000 }
+    outfits: [
+      { id: "standard", name: "Classic Colour", ring: null, price: 0 },
+      { id: "goldtrim", name: "Gold Trim", ring: "#facc15", price: 600 },
+      { id: "neon", name: "Neon Glow", ring: "#22c55e", price: 2000 }
     ]
   };
 
-  let state = JSON.parse(localStorage.getItem("disaster_tycoon_v1")) || DEFAULT_STATE;
+  let state = JSON.parse(localStorage.getItem("disaster_city_2d_v1")) || DEFAULT_STATE;
   let selectedGender = "Male";
-  let currentTab = "city";
+  let targetPos = null;
+  let isWorking = false;
+  let activeStationId = null;
+
+  // Virtual joystick state
+  let joy = { active: false, startX: 0, startY: 0, dx: 0, dy: 0, touchId: null };
+
+  // Decorative flood puddles
+  const puddles = [
+    { x: 220, y: 260, r: 75 },
+    { x: 740, y: 270, r: 90 },
+    { x: 480, y: 730, r: 85 },
+    { x: 740, y: 970, r: 95 },
+    { x: 210, y: 960, r: 70 },
+    { x: 980, y: 630, r: 65 }
+  ];
 
   function saveState() {
-    localStorage.setItem("disaster_tycoon_v1", JSON.stringify(state));
+    localStorage.setItem("disaster_city_2d_v1", JSON.stringify(state));
   }
 
-  function formatMoney(num) {
-    if (num >= 1000000) return "£" + (num / 1000000).toFixed(2) + "M";
-    if (num >= 10000) return "£" + (num / 1000).toFixed(1) + "k";
-    return "£" + Math.floor(num).toLocaleString();
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
   }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
 
   function selectGender(btn) {
     document.querySelectorAll(".gender-btn").forEach(b => b.classList.remove("selected"));
@@ -702,279 +507,29 @@
   }
 
   function startGame() {
-    const rawName = document.getElementById("char-name-input").value.trim();
-    state.name = rawName || "Alex";
+    const nameInput = document.getElementById("char-name-input").value.trim();
+    state.name = nameInput || "Builder";
     state.gender = selectedGender;
-    if (selectedGender === "Male") COSMETICS.skins[0].icon = "👨";
-    else if (selectedGender === "Female") COSMETICS.skins[0].icon = "👩";
-    else COSMETICS.skins[0].icon = "🧑";
     state.created = true;
     saveState();
-    initUI();
+    document.getElementById("setup-screen").style.display = "none";
+    updateHUD();
   }
 
-  function getStationStats(st) {
-    const payout = Math.round(st.basePayout * Math.pow(1.32, st.level - 1) * st.workers);
-    const speedMult = 1 + (st.level - 1) * 0.08 + (st.workers - 1) * 0.15;
-    const duration = Math.max(0.4, st.baseTime / speedMult);
-    const upgradeCost = Math.round((st.unlockCost || 10) * 0.6 * Math.pow(1.45, st.level));
-    const workerCost = Math.round((st.unlockCost || 25) * 2.5 * Math.pow(2.4, st.workers - 1));
-    return { payout, duration, upgradeCost, workerCost };
+  function formatMoney(n) {
+    if (n >= 1000000) return "£" + (n / 1000000).toFixed(2) + "M";
+    if (n >= 10000) return "£" + (n / 1000).toFixed(1) + "k";
+    return "£" + Math.floor(n).toLocaleString();
   }
 
-  function rebuildStation(id) {
-    const st = state.stations[id];
-    if (!st.unlocked && state.money >= st.unlockCost) {
-      state.money -= st.unlockCost;
-      st.unlocked = true;
-      saveState();
-      renderCity();
-      updateTownVisuals();
-    }
+  function getStats(st) {
+    const payout = Math.round(st.basePayout * Math.pow(1.4, st.level - 1));
+    const duration = Math.max(0.5, st.workDuration * Math.pow(0.92, st.level - 1));
+    const upgradeCost = Math.round((st.unlockCost || 15) * 0.75 * Math.pow(1.55, st.level));
+    return { payout, duration, upgradeCost };
   }
 
-  function upgradeStation(id) {
-    const st = state.stations[id];
-    const { upgradeCost } = getStationStats(st);
-    if (st.unlocked && state.money >= upgradeCost) {
-      state.money -= upgradeCost;
-      st.level += 1;
-      saveState();
-      renderCity();
-    }
-  }
-
-  function hireWorker(id) {
-    const st = state.stations[id];
-    const { workerCost } = getStationStats(st);
-    if (st.unlocked && state.money >= workerCost) {
-      state.money -= workerCost;
-      st.workers += 1;
-      saveState();
-      renderCity();
-    }
-  }
-
-  function buyOrEquip(category, id, price) {
-    if (!state.ownedCosmetics.includes(id)) {
-      if (state.money < price) return;
-      state.money -= price;
-      state.ownedCosmetics.push(id);
-    }
-    if (category === "skins") state.equippedSkin = id;
-    if (category === "hats") state.equippedHat = id;
-    if (category === "bgs") state.equippedBg = id;
-    saveState();
-    updateHeaderAndVisuals();
-    renderShop();
-  }
-
-  function updateHeaderAndVisuals() {
-    if (state.gender === "Male") COSMETICS.skins[0].icon = "👨";
-    else if (state.gender === "Female") COSMETICS.skins[0].icon = "👩";
-    else COSMETICS.skins[0].icon = "🧑";
-
-    document.getElementById("header-name").textContent = `${state.name} (${state.gender})`;
-    const skinObj = COSMETICS.skins.find(s => s.id === state.equippedSkin) || COSMETICS.skins[0];
-    const hatObj = COSMETICS.hats.find(h => h.id === state.equippedHat) || COSMETICS.hats[0];
-    document.getElementById("header-skin").textContent = skinObj.icon;
-    document.getElementById("header-hat").textContent = hatObj.display;
-    updateTownVisuals();
-  }
-
-  function updateTownVisuals() {
-    const unlockedCount = state.stations.filter(s => s.unlocked).length;
-    document.getElementById("city-progress-text").textContent = `Rebuilt: ${unlockedCount}/5`;
-
-    const scene = document.getElementById("town-scene");
-    const bgObj = COSMETICS.bgs.find(b => b.id === state.equippedBg) || COSMETICS.bgs[0];
-    scene.className = bgObj.className;
-
-    // Drain flood water & turn mud into green grass as buildings are restored
-    const water = document.getElementById("water-overlay");
-    const ground = document.getElementById("ground-layer");
-    const waterHeight = Math.max(0, 38 - (unlockedCount - 1) * 9.5);
-    water.style.height = waterHeight + "px";
-    water.style.opacity = unlockedCount === 5 ? "0" : "1";
-    ground.style.background = unlockedCount >= 4 ? "#15803d" : (unlockedCount >= 2 ? "#4d7c0f" : "#713f12");
-
-    // Render skyline
-    const row = document.getElementById("buildings-visual");
-    row.innerHTML = state.stations.map(st => `
-      <div class="building-slot ${st.unlocked ? "" : "ruined"}">
-        ${st.unlocked ? st.rebuiltIcon : st.buildingIcon}
-      </div>
-    `).join("");
-
-    if (unlockedCount === 5) {
-      document.getElementById("city-complete-banner").style.display = "block";
-    }
-  }
-
-  function renderCity() {
-    const container = document.getElementById("tab-city");
-    container.innerHTML = state.stations.map(st => {
-      if (!st.unlocked) {
-        const canAfford = state.money >= st.unlockCost;
-        return `
-          <div class="station-card locked">
-            <div class="station-title">
-              <div class="station-icon">${st.buildingIcon}</div>
-              <div>
-                <h3>${st.name}</h3>
-                <div class="station-meta">Ruined Building • Needs Rebuild</div>
-              </div>
-            </div>
-            <button class="btn btn-rebuild" id="rebuild-btn-${st.id}" ${canAfford ? "" : "disabled"} onclick="rebuildStation(${st.id})">
-              Rebuild
-              <small>${formatMoney(st.unlockCost)}</small>
-            </button>
-          </div>
-        `;
-      }
-
-      const { payout, duration, upgradeCost, workerCost } = getStationStats(st);
-      return `
-        <div class="station-card">
-          <div class="station-top">
-            <div class="station-title">
-              <div class="station-icon">${st.icon}</div>
-              <div>
-                <h3>${st.name}</h3>
-                <div class="station-meta">Lvl ${st.level} • ${st.workers} Worker${st.workers > 1 ? "s" : ""} • ${duration.toFixed(1)}s</div>
-              </div>
-            </div>
-            <div class="payout-badge">+${formatMoney(payout)}</div>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" id="prog-${st.id}" style="width:${st.progress * 100}%"></div>
-          </div>
-          <div class="upgrade-row">
-            <button class="btn btn-upgrade" id="upg-btn-${st.id}" onclick="upgradeStation(${st.id})">
-              ⬆️ Upgrade Station
-              <small>${formatMoney(upgradeCost)}</small>
-            </button>
-            <button class="btn btn-worker" id="wrk-btn-${st.id}" onclick="hireWorker(${st.id})">
-              👷 Hire Helper
-              <small>${formatMoney(workerCost)}</small>
-            </button>
-          </div>
-        </div>
-      `;
-    }).join("");
-    refreshButtonStates();
-  }
-
-  function renderShop() {
-    const container = document.getElementById("tab-shop");
-    const sections = [
-      { key: "skins", title: "Character Skins", equipped: state.equippedSkin },
-      { key: "hats", title: "Hats & Headgear", equipped: state.equippedHat },
-      { key: "bgs", title: "Town Sky Backgrounds", equipped: state.equippedBg }
-    ];
-
-    container.innerHTML = sections.map(sec => `
-      <div class="shop-section-title">${sec.title}</div>
-      <div class="shop-grid">
-        ${COSMETICS[sec.key].map(item => {
-          const owned = state.ownedCosmetics.includes(item.id);
-          const isEquipped = sec.equipped === item.id;
-          const canAfford = state.money >= item.price;
-          return `
-            <div class="shop-item ${isEquipped ? "equipped" : ""}">
-              <div class="shop-preview">${item.icon}</div>
-              <div class="shop-name">${item.name}</div>
-              <button class="btn ${isEquipped ? "btn-upgrade" : "btn-worker affordable"}" style="width:100%"
-                ${!owned && !canAfford ? "disabled" : ""}
-                onclick="buyOrEquip('${sec.key}', '${item.id}', ${item.price})">
-                ${isEquipped ? "Equipped" : (owned ? "Equip" : formatMoney(item.price))}
-              </button>
-            </div>
-          `;
-        }).join("")}
-      </div>
-    `).join("");
-  }
-
-  function refreshButtonStates() {
-    document.getElementById("money-display").textContent = formatMoney(state.money);
-    state.stations.forEach(st => {
-      if (!st.unlocked) {
-        const rb = document.getElementById(`rebuild-btn-${st.id}`);
-        if (rb) rb.disabled = state.money < st.unlockCost;
-      } else {
-        const { upgradeCost, workerCost } = getStationStats(st);
-        const ub = document.getElementById(`upg-btn-${st.id}`);
-        const wb = document.getElementById(`wrk-btn-${st.id}`);
-        if (ub) {
-          ub.disabled = state.money < upgradeCost;
-          ub.classList.toggle("affordable", state.money >= upgradeCost);
-        }
-        if (wb) {
-          wb.disabled = state.money < workerCost;
-          wb.classList.toggle("affordable", state.money >= workerCost);
-        }
-      }
-    });
-  }
-
-  function switchTab(tab) {
-    currentTab = tab;
-    document.getElementById("tab-city").style.display = tab === "city" ? "flex" : "none";
-    document.getElementById("tab-shop").style.display = tab === "shop" ? "flex" : "none";
-    document.getElementById("nav-city").classList.toggle("active", tab === "city");
-    document.getElementById("nav-shop").classList.toggle("active", tab === "shop");
-    if (tab === "shop") renderShop();
-    else renderCity();
-  }
-
-  let lastTime = performance.now();
-  let saveTimer = 0;
-
-  function gameLoop(now) {
-    const dt = (now - lastTime) / 1000;
-    lastTime = now;
-
-    if (state.created) {
-      let earned = false;
-      state.stations.forEach(st => {
-        if (!st.unlocked) return;
-        const { payout, duration } = getStationStats(st);
-        st.progress += dt / duration;
-        if (st.progress >= 1) {
-          const cycles = Math.floor(st.progress);
-          st.progress -= cycles;
-          state.money += payout * cycles;
-          earned = true;
-        }
-        const bar = document.getElementById(`prog-${st.id}`);
-        if (bar) bar.style.width = (st.progress * 100) + "%";
-      });
-
-      if (earned) {
-        refreshButtonStates();
-        if (currentTab === "shop") renderShop();
-      }
-
-      saveTimer += dt;
-      if (saveTimer >= 3) {
-        saveState();
-        saveTimer = 0;
-      }
-    }
-    requestAnimationFrame(gameLoop);
-  }
-
-  function initUI() {
-    if (state.created) {
-      document.getElementById("setup-screen").style.display = "none";
-      updateHeaderAndVisuals();
-      renderCity();
-    }
-  }
-
-  initUI();
-  requestAnimationFrame(gameLoop);
-</script>
-</body>
-</html>
+  function updateHUD() {
+    document.getElementById("hud-money").textContent = formatMoney(state.money);
+    const rebuilt = state.stations.filter(s => s.unlocked).length;
+    document.getElementById("hud-
