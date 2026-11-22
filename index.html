@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,8 +11,6 @@
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      touch-action: none;
     }
 
     body, html {
@@ -31,18 +28,21 @@
       display: block;
       width: 100%;
       height: 100%;
+      touch-action: none;
+      user-select: none;
     }
 
     /* Setup Modal */
     #setup-screen {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.96);
+      background: rgba(15, 23, 42, 0.98);
       z-index: 100;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
+      touch-action: manipulation;
     }
 
     .setup-box {
@@ -93,8 +93,6 @@
       color: white;
       font-size: 16px;
       outline: none;
-      touch-action: auto;
-      user-select: text;
     }
 
     .gender-options {
@@ -104,7 +102,7 @@
     }
 
     .gender-btn {
-      padding: 12px;
+      padding: 14px 10px;
       border-radius: 12px;
       border: 2px solid #334155;
       background: #0f172a;
@@ -112,6 +110,7 @@
       font-weight: 700;
       font-size: 15px;
       cursor: pointer;
+      touch-action: manipulation;
     }
 
     .gender-btn.male.selected {
@@ -129,7 +128,7 @@
     .start-btn {
       width: 100%;
       margin-top: 18px;
-      padding: 14px;
+      padding: 15px;
       border: none;
       border-radius: 14px;
       background: #22c55e;
@@ -137,6 +136,7 @@
       font-size: 17px;
       font-weight: 800;
       cursor: pointer;
+      touch-action: manipulation;
     }
 
     /* Top HUD */
@@ -148,6 +148,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 6px;
       pointer-events: none;
       z-index: 20;
     }
@@ -155,23 +156,30 @@
     .hud-pill {
       background: rgba(15, 23, 42, 0.88);
       border: 1px solid #334155;
-      padding: 8px 14px;
+      padding: 8px 12px;
       border-radius: 999px;
       font-weight: 800;
-      font-size: 14px;
+      font-size: 13px;
       backdrop-filter: blur(6px);
       pointer-events: auto;
+      touch-action: manipulation;
     }
 
     .money-text {
       color: #facc15;
-      font-size: 17px;
+      font-size: 16px;
     }
 
     .shop-btn {
       background: #0284c7;
       border-color: #38bdf8;
       color: white;
+      cursor: pointer;
+    }
+
+    .reset-btn {
+      background: #334155;
+      color: #cbd5e1;
       cursor: pointer;
     }
 
@@ -188,6 +196,7 @@
       z-index: 25;
       display: none;
       box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      touch-action: manipulation;
     }
 
     #action-panel h3 {
@@ -211,6 +220,7 @@
       font-size: 14px;
       margin-bottom: 6px;
       cursor: pointer;
+      touch-action: manipulation;
     }
 
     .act-btn:last-child {
@@ -222,6 +232,7 @@
       color: #052e16;
       font-size: 16px;
       padding: 14px 10px;
+      user-select: none;
     }
 
     .btn-work:active {
@@ -249,7 +260,7 @@
     #shop-modal {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(15, 23, 42, 0.96);
       z-index: 80;
       display: none;
       flex-direction: column;
@@ -301,7 +312,7 @@
       background: rgba(15, 23, 42, 0.8);
       padding: 5px 12px;
       border-radius: 999px;
-      font-size: 12px;
+      font-size: 11px;
       color: #cbd5e1;
       pointer-events: none;
       z-index: 15;
@@ -323,11 +334,11 @@
       <div class="input-group">
         <label>Select Gender</label>
         <div class="gender-options">
-          <button type="button" class="gender-btn male selected" data-gender="Male" onclick="selectGender(this)">Male (Blue)</button>
-          <button type="button" class="gender-btn female" data-gender="Female" onclick="selectGender(this)">Female (Pink)</button>
+          <button type="button" id="btn-male" class="gender-btn male selected">Male (Blue)</button>
+          <button type="button" id="btn-female" class="gender-btn female">Female (Pink)</button>
         </div>
       </div>
-      <button class="start-btn" onclick="startGame()">Enter City</button>
+      <button type="button" id="btn-enter-city" class="start-btn">Enter City</button>
     </div>
   </div>
 
@@ -335,7 +346,10 @@
   <div id="hud-top">
     <div class="hud-pill money-text" id="hud-money">£0</div>
     <div class="hud-pill" id="hud-progress">City: 1/5</div>
-    <button class="hud-pill shop-btn" onclick="toggleShop(true)">🎩 Shop</button>
+    <div style="display:flex;gap:6px;">
+      <button type="button" class="hud-pill shop-btn" id="btn-open-shop">🎩 Shop</button>
+      <button type="button" class="hud-pill reset-btn" id="btn-reset-char">↺</button>
+    </div>
   </div>
 
   <div class="hint-banner" id="hint-banner">Tap anywhere on the city to walk • Walk to a station to work!</div>
@@ -354,7 +368,7 @@
   <div id="shop-modal">
     <div class="shop-header">
       <h2 style="margin:0;">🎩 Cosmetic Shop</h2>
-      <button class="close-shop" onclick="toggleShop(false)">Back to City</button>
+      <button type="button" class="close-shop" id="btn-close-shop">Back to City</button>
     </div>
     <div id="shop-content"></div>
   </div>
@@ -363,173 +377,28 @@
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
 
-  // World dimensions
   const WORLD_W = 1200;
   const WORLD_H = 1200;
 
-  const DEFAULT_STATE = {
-    created: false,
-    name: "Player",
-    gender: "Male",
-    money: 0,
-    equippedHat: "none",
-    equippedOutfit: "standard",
-    ownedCosmetics: ["none", "standard"],
-    player: { x: 600, y: 620 },
-    stations: [
-      {
-        id: 0,
-        name: "Water Pump",
-        icon: "🚰",
-        x: 600,
-        y: 470,
-        w: 130,
-        h: 100,
-        unlocked: true,
-        unlockCost: 0,
-        level: 1,
-        basePayout: 2,
-        workDuration: 1.4,
-        workProgress: 0
-      },
-      {
-        id: 1,
-        name: "Timber Yard",
-        icon: "🪚",
-        x: 320,
-        y: 420,
-        w: 140,
-        h: 110,
-        unlocked: false,
-        unlockCost: 50,
-        level: 1,
-        basePayout: 10,
-        workDuration: 1.8,
-        workProgress: 0
-      },
-      {
-        id: 2,
-        name: "Soup Kitchen",
-        icon: "🍲",
-        x: 880,
-        y: 420,
-        w: 140,
-        h: 110,
-        unlocked: false,
-        unlockCost: 250,
-        level: 1,
-        basePayout: 45,
-        workDuration: 2.2,
-        workProgress: 0
-      },
-      {
-        id: 3,
-        name: "Hydro Workshop",
-        icon: "🔧",
-        x: 320,
-        y: 820,
-        w: 150,
-        h: 115,
-        unlocked: false,
-        unlockCost: 1000,
-        level: 1,
-        basePayout: 200,
-        workDuration: 2.6,
-        workProgress: 0
-      },
-      {
-        id: 4,
-        name: "Village Town Hall",
-        icon: "🏛️",
-        x: 880,
-        y: 820,
-        w: 160,
-        h: 125,
-        unlocked: false,
-        unlockCost: 5000,
-        level: 1,
-        basePayout: 950,
-        workDuration: 3.0,
-        workProgress: 0
-      }
-    ]
-  };
-
-  const COSMETICS = {
-    hats: [
-      { id: "none", name: "No Hat", icon: "", price: 0 },
-      { id: "cap", name: "Builder Cap", icon: "🧢", price: 100 },
-      { id: "hardhat", name: "Safety Helmet", icon: "⛑️", price: 400 },
-      { id: "tophat", name: "Mayor Top Hat", icon: "🎩", price: 1500 },
-      { id: "crown", name: "Golden Crown", icon: "👑", price: 5000 }
-    ],
-    outfits: [
-      { id: "standard", name: "Classic Colour", ring: null, price: 0 },
-      { id: "goldtrim", name: "Gold Trim", ring: "#facc15", price: 600 },
-      { id: "neon", name: "Neon Glow", ring: "#22c55e", price: 2000 }
-    ]
-  };
-
-  let state = JSON.parse(localStorage.getItem("disaster_city_2d_v1")) || DEFAULT_STATE;
-  let selectedGender = "Male";
-  let targetPos = null;
-  let isWorking = false;
-  let activeStationId = null;
-
-  // Virtual joystick state
-  let joy = { active: false, startX: 0, startY: 0, dx: 0, dy: 0, touchId: null };
-
-  // Decorative flood puddles
-  const puddles = [
-    { x: 220, y: 260, r: 75 },
-    { x: 740, y: 270, r: 90 },
-    { x: 480, y: 730, r: 85 },
-    { x: 740, y: 970, r: 95 },
-    { x: 210, y: 960, r: 70 },
-    { x: 980, y: 630, r: 65 }
-  ];
-
-  function saveState() {
-    localStorage.setItem("disaster_city_2d_v1", JSON.stringify(state));
-  }
-
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener("resize", resizeCanvas);
-  resizeCanvas();
-
-  function selectGender(btn) {
-    document.querySelectorAll(".gender-btn").forEach(b => b.classList.remove("selected"));
-    btn.classList.add("selected");
-    selectedGender = btn.dataset.gender;
-  }
-
-  function startGame() {
-    const nameInput = document.getElementById("char-name-input").value.trim();
-    state.name = nameInput || "Builder";
-    state.gender = selectedGender;
-    state.created = true;
-    saveState();
-    document.getElementById("setup-screen").style.display = "none";
-    updateHUD();
-  }
-
-  function formatMoney(n) {
-    if (n >= 1000000) return "£" + (n / 1000000).toFixed(2) + "M";
-    if (n >= 10000) return "£" + (n / 1000).toFixed(1) + "k";
-    return "£" + Math.floor(n).toLocaleString();
-  }
-
-  function getStats(st) {
-    const payout = Math.round(st.basePayout * Math.pow(1.4, st.level - 1));
-    const duration = Math.max(0.5, st.workDuration * Math.pow(0.92, st.level - 1));
-    const upgradeCost = Math.round((st.unlockCost || 15) * 0.75 * Math.pow(1.55, st.level));
-    return { payout, duration, upgradeCost };
-  }
-
-  function updateHUD() {
-    document.getElementById("hud-money").textContent = formatMoney(state.money);
-    const rebuilt = state.stations.filter(s => s.unlocked).length;
-    document.getElementById("hud-
+  function createDefaultState() {
+    return {
+      created: false,
+      name: "Player",
+      gender: "Male",
+      money: 0,
+      equippedHat: "none",
+      equippedOutfit: "standard",
+      ownedCosmetics: ["none", "standard"],
+      player: { x: 600, y: 620 },
+      stations: [
+        {
+          id: 0,
+          name: "Water Pump",
+          icon: "🚰",
+          x: 600,
+          y: 470,
+          w: 130,
+          h: 100,
+          unlocked: true,
+          unlockCost: 0,
+          level: 1,
